@@ -2,9 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pygam
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
 
@@ -35,11 +37,38 @@ class Modeler:
 
         plt.show()
 
+    def gammer(self):
+        self.model = pygam.GAM().fit(self.x_train,self.y_train)
+        self.train_preds = self.model.predict(self.x_train)
+        self.test_preds = self.model.predict(self.x_test)
+
+        train_mse = mse(self.y_train, self.train_preds)
+        test_mse = mse(self.y_test, self.test_preds)
+        print(train_mse, test_mse)
+        print("Train R2", r2_score(self.y_train, self.train_preds))
+        print("Test R2", r2_score(self.y_test, self.test_preds))
+
+
     def linreg(self):
         self.model = LinearRegression(normalize = True)
         self.model.fit(self.x_train, self.y_train)
         self.train_preds = self.model.predict(self.x_train)
         self.test_preds = self.model.predict(self.x_test)
+
+        train_mse = mse(self.y_train, self.train_preds)
+        test_mse = mse(self.y_test, self.test_preds)
+        print(train_mse, test_mse)
+        print("Train R2", r2_score(self.y_train, self.train_preds))
+        print("Test R2", r2_score(self.y_test, self.test_preds))
+
+    def polyreg(self, degree = 2):
+        poly = PolynomialFeatures(degree)
+        x_train = poly.fit_transform(self.x_train)
+        x_test = poly.fit_transform(self.x_test)
+        self.model = LinearRegression(normalize = True)
+        self.model.fit(x_train, self.y_train)
+        self.train_preds = self.model.predict(x_train)
+        self.test_preds = self.model.predict(x_test)
 
         train_mse = mse(self.y_train, self.train_preds)
         test_mse = mse(self.y_test, self.test_preds)
@@ -76,7 +105,7 @@ class Modeler:
         pass
 
 class Listings:
-    def __init__(self, filename = 'chicago_listings.csv', groupAmenities = False, DATT = True):
+    def __init__(self, filename = 'chicago_listings.csv', groupAmenities = True, DATT = True):
         # pd.set_option('display.max_columns', 500)
         self.readListings(filename)
         self.groupAmenities = groupAmenities
