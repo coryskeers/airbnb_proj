@@ -37,8 +37,8 @@ class Modeler:
 
         plt.show()
 
-    def gammer(self):
-        self.model = pygam.GAM().fit(self.x_train,self.y_train)
+    def gammer(self, n_splines = 10):
+        self.model = pygam.GAM(n_splines = n_splines).fit(self.x_train,self.y_train)
         self.train_preds = self.model.predict(self.x_train)
         self.test_preds = self.model.predict(self.x_test)
 
@@ -65,7 +65,7 @@ class Modeler:
         poly = PolynomialFeatures(degree)
         x_train = poly.fit_transform(self.x_train)
         x_test = poly.fit_transform(self.x_test)
-        self.model = LinearRegression(normalize = True)
+        self.model = LinearRegression()
         self.model.fit(x_train, self.y_train)
         self.train_preds = self.model.predict(x_train)
         self.test_preds = self.model.predict(x_test)
