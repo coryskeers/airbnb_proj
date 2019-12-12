@@ -17,6 +17,11 @@ class Modeler:
         self.x = x
         self.y = y
 
+    def testGAM(self, x, y):
+        test_preds = self.model.predict(x)
+        print(mse(y, test_preds))
+        print(r2_score(y, test_preds))
+
     def split_data(self, test_size = 0.3):
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.x, self.y, test_size = test_size)
 
@@ -171,7 +176,7 @@ class Listings:
         kmeans = KMeans(n_clusters = k, init = 'k-means++')
         labels = kmeans.fit_predict(self.df[['latitude', 'longitude']].copy())
         if showplot:
-            sns.scatterplot(self.df.latitude, self.df.longitude, alpha=0.3)
+            sns.scatterplot(self.df.longitude, self.df.latitude, alpha=0.3)
             sns.scatterplot(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1])
             plt.show()
         self.df['kmeans_neighborhoods'] = labels
@@ -291,8 +296,8 @@ class Listings:
         self.fillNulls('review_scores_value', self.df.review_scores_value.mean())
         self.fillNulls('reviews_per_month', 0)
 
-        #set kmeans neighborhoods using estimated best k=8 option
-        self.longLat(k = 8)
+        #set kmeans neighborhoods using estimated best k=20 option
+        self.longLat(k = 20)
 
         if self.groupAmenities:
             self.df.amenities = self.df.amenities.apply(lambda x: len(x.split(',')))
