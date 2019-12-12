@@ -5,7 +5,7 @@ import seaborn as sns
 import pygam
 
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.linear_model import LinearRegression, LassoCV, RidgeCV
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
@@ -37,7 +37,7 @@ class Modeler:
 
         plt.show()
 
-    def gammer(self, n_splines = 10):
+    def gammer(self, n_splines = 21):
         self.model = pygam.GAM(n_splines = n_splines).fit(self.x_train,self.y_train)
         self.train_preds = self.model.predict(self.x_train)
         self.test_preds = self.model.predict(self.x_test)
@@ -48,8 +48,31 @@ class Modeler:
         print("Train R2", r2_score(self.y_train, self.train_preds))
         print("Test R2", r2_score(self.y_test, self.test_preds))
 
+    def gammerMulti(self):
+        train_preds = []
+        test_preds = []
+        for i in range(5,50):
+            print("Iter ",i)
+            model = pygam.GAM(n_splines = i).fit(self.x_train,self.y_train)
+            train_preds.append(mse(self.y_train,model.predict(self.x_train)))
+            test_preds.append(mse(self.y_test,model.predict(self.x_test)))
+        print(train_preds)
+        print(test_preds)
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (12, 4))
+        fig.suptitle("Train Error vs. Test Error", fontsize = 14, y = 1)
+        plt.subplots_adjust(top = 0.93, wspace = 0)
+        ax1.plot(range(5,50), test_preds, linestyle='-', marker='o')
+        ax1.set_title("Test Set")
+        ax1.set_xlabel("N_Splines")
+        ax1.set_ylabel("MSE")
+        ax2.plot(range(5,50), train_preds, linestyle='-', marker='o')
+        ax2.set_title("Train Set")
+        ax2.set_xlabel("N_Splines")
+        ax2.set_ylabel("")
 
-    def linreg(self):
+        plt.show()
+
+    def linreg(self, cv = 10):
         self.model = LinearRegression(normalize = True)
         self.model.fit(self.x_train, self.y_train)
         self.train_preds = self.model.predict(self.x_train)
@@ -65,7 +88,7 @@ class Modeler:
         poly = PolynomialFeatures(degree)
         x_train = poly.fit_transform(self.x_train)
         x_test = poly.fit_transform(self.x_test)
-        self.model = LinearRegression()
+        self.model = LassoCV(cv = 20, normalize = True)
         self.model.fit(x_train, self.y_train)
         self.train_preds = self.model.predict(x_train)
         self.test_preds = self.model.predict(x_test)
@@ -76,8 +99,8 @@ class Modeler:
         print("Train R2", r2_score(self.y_train, self.train_preds))
         print("Test R2", r2_score(self.y_test, self.test_preds))
 
-    def lassoer(self):
-        self.model = Lasso(normalize = True)
+    def lassoer(self, cv = 20):
+        self.model = LassoCV(cv = cv, normalize = True)
         self.model.fit(self.x_train, self.y_train)
         self.train_preds = self.model.predict(self.x_train)
         self.test_preds = self.model.predict(self.x_test)
@@ -89,8 +112,8 @@ class Modeler:
         print("Test R2", r2_score(self.y_test, self.test_preds))
 
 
-    def ridger(self):
-        self.model = Ridge(normalize = True)
+    def ridger(self, cv = 20):
+        self.model = RidgeCV(cv = cv, normalize = True)
         self.model.fit(self.x_train, self.y_train)
         self.train_preds = self.model.predict(self.x_train)
         self.test_preds = self.model.predict(self.x_test)
@@ -100,9 +123,6 @@ class Modeler:
         print(train_mse, test_mse)
         print("Train R2", r2_score(self.y_train, self.train_preds))
         print("Train R2", r2_score(self.y_test, self.test_preds))
-
-    def spliner(self):
-        pass
 
 class Listings:
     def __init__(self, filename = 'chicago_listings.csv', groupAmenities = True, DATT = True):
