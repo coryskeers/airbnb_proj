@@ -12,6 +12,8 @@ from sklearn.metrics import r2_score
 
 from sklearn.cluster import KMeans
 
+from sklearn.decomposition import PCA
+
 class Modeler:
     def __init__(self, x, y):
         self.x = x
@@ -41,6 +43,17 @@ class Modeler:
         ax2.set_ylabel("")
 
         plt.show()
+
+    def plotModel2(self):
+        pca = PCA(n_components = 2)
+        pca_result = pca.fit_transform(self.x_test)
+        sns.scatterplot(x = pca_result[:,0], y = self.y_test, alpha = 0.5)
+        sns.scatterplot(x = pca_result[:,0], y = self.test_preds, alpha = 0.5, color = "orange")
+        plt.title('PCA Scatterplot')
+        plt.xlabel("Principal Component 1")
+        plt.ylabel("Price")
+        plt.show()
+        
 
     def gammer(self, n_splines = 21):
         self.model = pygam.GAM(n_splines = n_splines).fit(self.x_train,self.y_train)
