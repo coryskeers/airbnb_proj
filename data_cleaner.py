@@ -173,16 +173,17 @@ class Listings:
         Set k = -1 to graph error for k=1:20. Otherwise, set K and returns kmeans.
         8 was found to be a good number.'''
         if k <= 0:
-            print("Fitting 20 ks")
+            print("Fitting 35 ks")
             cluster_sum_squares = []
-            for i in range(1, 20):
+            for i in range(1, 35):
                 print("iteration", i)
                 kmeans = KMeans(n_clusters = i, init = 'k-means++')
                 kmeans.fit(self.df[['latitude', 'longitude']].copy())
                 cluster_sum_squares.append(kmeans.inertia_)
-            plt.plot(range(1,20), cluster_sum_squares)
+            plt.plot(range(1,35), cluster_sum_squares)
             plt.xlabel("# Clusters")
             plt.ylabel("Cluster Sum of Squares")
+            plt.title("K-Means Neighborhood Clustering")
             plt.show()
             return kmeans
             
@@ -190,7 +191,7 @@ class Listings:
         labels = kmeans.fit_predict(self.df[['latitude', 'longitude']].copy())
         if showplot:
             sns.scatterplot(self.df.longitude, self.df.latitude, alpha=0.3)
-            sns.scatterplot(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1])
+            sns.scatterplot(kmeans.cluster_centers_[:,1], kmeans.cluster_centers_[:,0])
             plt.show()
         self.df['kmeans_neighborhoods'] = labels
         self.df.kmeans_neighborhoods = self.df.kmeans_neighborhoods.astype('category')
